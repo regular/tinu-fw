@@ -11,8 +11,8 @@
 
 
     <project
-        title="C++ Example (bigtime)"
-        name="bigtime_CC2640R2_LAUNCHXL_tirtos_ccs"
+        title="C++ Example (sysbios_bigtime_fw)"
+        name="sysbios_bigtime_fw_CC2640R2_LAUNCHXL_tirtos_ccs"
         toolChain="TI"
         connection="TIXDS110_Connection.xml"
         device="Cortex M.CC2640R2F"
@@ -64,14 +64,14 @@
         <property name="buildProfile" value="release"/>
         <property name="isHybrid" value="true"/>
         <property name="configuroOptions" value=" --compileOptions &quot;${COMPILER_FLAGS} &quot;"/>
-        <group id="bigtime.SIMPLELINK_CC2640R2_SDK.CC2640R2_LAUNCHXL.sysbios.TI"/>
+        <group id="sysbios_bigtime_fw.SIMPLELINK_CC2640R2_SDK.CC2640R2_LAUNCHXL.sysbios.TI"/>
         <file path="../../overview.rov.json" openOnCreation="false" excludeFromBuild="false" action="copy">
         </file>
-        <file path="../../tirtos/bigtime.cfg" openOnCreation="false" excludeFromBuild="false" action="copy">
+        <file path="../../tirtos/sysbios_bigtime_fw.cfg" openOnCreation="false" excludeFromBuild="false" action="copy">
         </file>
         <file path="../../README.md" openOnCreation="false" excludeFromBuild="false" action="copy">
         </file>
-        <file path="../../bigtime.cpp" openOnCreation="false" excludeFromBuild="false" action="copy">
+        <file path="../../sysbios_bigtime_fw.cpp" openOnCreation="false" excludeFromBuild="false" action="copy">
         </file>
         <file path="../../README.html" openOnCreation="false" excludeFromBuild="false" action="copy">
         </file>

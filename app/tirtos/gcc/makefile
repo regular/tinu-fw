@@ -10,11 +10,11 @@ LNK = "$(GCC_ARMCOMPILER)/bin/arm-none-eabi-gcc"
 XDCTARGET = gnu.targets.arm.M3
 PLATFORM = ti.platforms.simplelink:CC2640R2F
 
-OBJECTS = bigtime.obj CC2640R2_LAUNCHXL.obj CC2640R2_LAUNCHXL_fxns.obj ccfg.obj
+OBJECTS = sysbios_bigtime_fw.obj CC2640R2_LAUNCHXL.obj CC2640R2_LAUNCHXL_fxns.obj ccfg.obj
 
-CONFIGPKG = bigtime
+CONFIGPKG = sysbios_bigtime_fw
 
-NAME = bigtime
+NAME = sysbios_bigtime_fw
 
 CFLAGS = -I../.. \
     -DDeviceFamily_CC26X0R2 \
@@ -83,11 +83,11 @@ all: $(NAME).out
 
 $(CONFIGPKG)/compiler.opt: $(CONFIGPKG)/linker.cmd
 
-$(CONFIGPKG)/linker.cmd: ../../tirtos/bigtime.cfg
+$(CONFIGPKG)/linker.cmd: ../../tirtos/sysbios_bigtime_fw.cfg
 	@ echo Running Configuro...
-	@ $(XDC_INSTALL_DIR)/xs --xdcpath="$(XDCPATH)" xdc.tools.configuro -c "$(GCC_ARMCOMPILER)" -t $(XDCTARGET) -p $(PLATFORM) --compileOptions "$(CFLAGS)" -o "$(CONFIGPKG)" ../../tirtos/bigtime.cfg
+	@ $(XDC_INSTALL_DIR)/xs --xdcpath="$(XDCPATH)" xdc.tools.configuro -c "$(GCC_ARMCOMPILER)" -t $(XDCTARGET) -p $(PLATFORM) --compileOptions "$(CFLAGS)" -o "$(CONFIGPKG)" ../../tirtos/sysbios_bigtime_fw.cfg
 
-bigtime.obj: ../../bigtime.cpp $(CONFIGPKG)/compiler.opt
+sysbios_bigtime_fw.obj: ../../sysbios_bigtime_fw.cpp $(CONFIGPKG)/compiler.opt
 	@ echo Building $@
 	@ $(CC) $(CPPFLAGS) $< -c @$(CONFIGPKG)/compiler.opt -o $@
 

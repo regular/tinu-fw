@@ -31,7 +31,7 @@
  */
 
 /*
- *  ======== bigtime.cpp ========
+ *  ======== sysbios_bigtime_fw.cpp ========
  */
 
 /* XDC module Headers */
