@@ -10,7 +10,7 @@ LNK = "$(CCS_ARMCOMPILER)/bin/armcl"
 XDCTARGET = ti.targets.arm.elf.M3
 PLATFORM = ti.platforms.simplelink:CC2640R2F
 
-OBJECTS = sysbios_bigtime_fw.obj CC2640R2_LAUNCHXL.obj CC2640R2_LAUNCHXL_fxns.obj ccfg.obj
+OBJECTS = sysbios_bigtime_fw.obj chiptypes.obj CC2640R2_LAUNCHXL.obj CC2640R2_LAUNCHXL_fxns.obj ccfg.obj
 
 CONFIGPKG = sysbios_bigtime_fw
 
@@ -60,6 +60,10 @@ $(CONFIGPKG)/linker.cmd: ../../tirtos/sysbios_bigtime_fw.cfg
 	@ $(XDC_INSTALL_DIR)/xs --xdcpath="$(XDCPATH)" xdc.tools.configuro -c "$(CCS_ARMCOMPILER)" -t $(XDCTARGET) -p $(PLATFORM) --compileOptions "$(CFLAGS)" -o "$(CONFIGPKG)" ../../tirtos/sysbios_bigtime_fw.cfg
 
 sysbios_bigtime_fw.obj: ../../sysbios_bigtime_fw.cpp $(CONFIGPKG)/compiler.opt
+	@ echo Building $@
+	@ $(CC) $(CFLAGS) $< --cmd_file=$(CONFIGPKG)/compiler.opt --output_file=$@
+
+chiptypes.obj: ../../chiptypes.cpp $(CONFIGPKG)/compiler.opt
 	@ echo Building $@
 	@ $(CC) $(CFLAGS) $< --cmd_file=$(CONFIGPKG)/compiler.opt --output_file=$@
 

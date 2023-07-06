@@ -135,6 +135,7 @@ Clock_Struct clk0Struct, clk1Struct;
 /*
  *  ======== main ========
  */
+void getDeviceInfo(char *buff, int buffsize);
 int main()
 {
 
@@ -178,6 +179,11 @@ int main()
                     1, &clkParams);
 
     System_printf("bigTime started.\n");
+    char buff[128];
+    getDeviceInfo(buff, sizeof(buff));
+
+    System_printf(buff);
+    System_flush();
 
     BIOS_start();    /* does not return */
     return(0);
