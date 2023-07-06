@@ -1,0 +1,16 @@
+*.obj
+*.map
+app/tirtos/ccs/chipinfo-fw.out
+kernel/tirtos/builds/CC2640R2_LAUNCHXL/release/ccs/.interfaces
+kernel/tirtos/builds/CC2640R2_LAUNCHXL/release/ccs/.libraries,em3
+kernel/tirtos/builds/CC2640R2_LAUNCHXL/release/ccs/.xdcenv.mak
+kernel/tirtos/builds/CC2640R2_LAUNCHXL/release/ccs/compiler.opt
+kernel/tirtos/builds/CC2640R2_LAUNCHXL/release/ccs/compiler.opt.defs
+kernel/tirtos/builds/CC2640R2_LAUNCHXL/release/ccs/config.bld
+kernel/tirtos/builds/CC2640R2_LAUNCHXL/release/ccs/custom.mak
+kernel/tirtos/builds/CC2640R2_LAUNCHXL/release/ccs/linker.cmd
+kernel/tirtos/builds/CC2640R2_LAUNCHXL/release/ccs/package.bld
+kernel/tirtos/builds/CC2640R2_LAUNCHXL/release/ccs/package.mak
+kernel/tirtos/builds/CC2640R2_LAUNCHXL/release/ccs/package.xdc
+kernel/tirtos/builds/CC2640R2_LAUNCHXL/release/ccs/package.xs
+kernel/tirtos/builds/CC2640R2_LAUNCHXL/release/ccs/package/
