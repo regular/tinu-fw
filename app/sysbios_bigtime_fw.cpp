@@ -90,7 +90,6 @@ Clock cl4(4);  /* task clock */
 
 Task_Struct task0Struct, task1Struct;
 Char task0Stack[TASKSTACKSIZE], task1Stack[TASKSTACKSIZE];
-Clock_Struct clk0Struct, clk1Struct;
 
 class Sem {
 public:
@@ -144,13 +143,14 @@ void getDeviceInfo(char *buff, int buffsize);
 Sem sem0;
 Sem sem1;
 
+Clk myClock0(100, (Clock_FuncPtr)&clockPrd, &cl1);
+Clk myClock1(1000, (Clock_FuncPtr)&clockPrd, &cl2);
+
 int main() {
+
 
     /* Construct BIOS objects */
     Task_Params taskParams;
-    Clock_Params clkParams;
-
-    /* Construct clock Task thread */
     Task_Params_init(&taskParams);
     taskParams.arg0 = (UArg)&cl3;
     taskParams.stackSize = TASKSTACKSIZE;
@@ -161,17 +161,6 @@ int main() {
     taskParams.arg0 = (UArg)&cl4;
     Task_construct(&task1Struct, (Task_FuncPtr)clockTask, &taskParams, NULL);
 
-    Clock_Params_init(&clkParams);
-    clkParams.period = 100;
-    clkParams.startFlag = true;
-    clkParams.arg = (UArg)&cl1;
-    Clock_construct(&clk0Struct, (Clock_FuncPtr)clockPrd,
-                    1, &clkParams);
-    clkParams.period = 1000;
-    clkParams.startFlag = true;
-    clkParams.arg = (UArg)&cl2;
-    Clock_construct(&clk1Struct, (Clock_FuncPtr)clockPrd,
-                    1, &clkParams);
     System_printf("bigTime started.\n");
     char buff[128];
     getDeviceInfo(buff, sizeof(buff));
