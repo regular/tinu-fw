@@ -13,56 +13,58 @@
 #define TASKSTACKSIZE   512
 
 class Clock {
-    private:
-         // data
-         int id;
-         double ticks;
-         int microsecond;
-         int millisecond;
-         int second;
-         int minute;
-         int hour;
-         int day;
-         int month;
-         int year;
-         int century;
-         int millenium;
-         Diags_Mask clockLog;
+  private:
+    // data
+    int id;
+    double ticks;
+    int microsecond;
+    int millisecond;
+    int second;
+    int minute;
+    int hour;
+    int day;
+    int month;
+    int year;
+    int century;
+    int millenium;
+    Diags_Mask clockLog;
 
-    public:
-        // methods
-        Clock(int newId);  // Constructor
-        ~Clock();          // Destructor
-        void tick();
-        long getTicks();
-        int getId();
-        int getMicrosecond();
-        int getMillisecond();
-        int getSecond();
-        int getMinute();
-        int getHour();
-        int getDay();
-        int getMonth();
-        int getYear();
-        int getCentury();
-        int getMillenium();
-        void setMicrosecond();
-        void setMillisecond();
-        void setMillisecond(int nMilliseconds);
-        void setSecond();
-        void setMinute();
-        void setHour();
-        void setDay();
-        void setMonth();
-        void setYear();
-        void setCentury();
-        void setMillenium();
+  public:
+    // methods
+    Clock(int newId);  // Constructor
+    ~Clock();          // Destructor
+    void tick();
+    long getTicks();
+    int getId();
+    int getMicrosecond();
+    int getMillisecond();
+    int getSecond();
+    int getMinute();
+    int getHour();
+    int getDay();
+    int getMonth();
+    int getYear();
+    int getCentury();
+    int getMillenium();
+    void setMicrosecond();
+    void setMillisecond();
+    void setMillisecond(int nMilliseconds);
+    void setSecond();
+    void setMinute();
+    void setHour();
+    void setDay();
+    void setMonth();
+    void setYear();
+    void setCentury();
+    void setMillenium();
 };
 
-const char *months[12] = { "January", "February", "March",
-                           "April",   "May",      "June",
-                           "July",    "August",   "September",
-                           "October", "November", "December" };
+const char *months[12] = {
+  "January", "February", "March",
+  "April",   "May",      "June",
+  "July",    "August",   "September",
+  "October", "November", "December"
+};
 
 /*
  * Extern "C" block to prevent name mangling
@@ -101,8 +103,8 @@ public:
     Semaphore_post(_handle);
   }
 private:
-    Semaphore_Struct _sem;
-    Semaphore_Handle _handle;
+  Semaphore_Struct _sem;
+  Semaphore_Handle _handle;
 };
 
 Sem::Sem() {
@@ -147,39 +149,31 @@ Clk myClock0(100, (Clock_FuncPtr)&clockPrd, &cl1);
 Clk myClock1(1000, (Clock_FuncPtr)&clockPrd, &cl2);
 
 int main() {
+  Task_Params taskParams;
+  Task_Params_init(&taskParams);
+  taskParams.arg0 = (UArg)&cl3;
+  taskParams.stackSize = TASKSTACKSIZE;
+  taskParams.stack = &task0Stack;
+  Task_construct(&task0Struct, (Task_FuncPtr)clockTask, &taskParams, NULL);
 
+  taskParams.stack = &task1Stack;
+  taskParams.arg0 = (UArg)&cl4;
+  Task_construct(&task1Struct, (Task_FuncPtr)clockTask, &taskParams, NULL);
 
-    /* Construct BIOS objects */
-    Task_Params taskParams;
-    Task_Params_init(&taskParams);
-    taskParams.arg0 = (UArg)&cl3;
-    taskParams.stackSize = TASKSTACKSIZE;
-    taskParams.stack = &task0Stack;
-    Task_construct(&task0Struct, (Task_FuncPtr)clockTask, &taskParams, NULL);
+  System_printf("bigTime started.\n");
+  char buff[128];
+  getDeviceInfo(buff, sizeof(buff));
 
-    taskParams.stack = &task1Stack;
-    taskParams.arg0 = (UArg)&cl4;
-    Task_construct(&task1Struct, (Task_FuncPtr)clockTask, &taskParams, NULL);
+  System_printf(buff);
+  System_flush();
 
-    System_printf("bigTime started.\n");
-    char buff[128];
-    getDeviceInfo(buff, sizeof(buff));
-
-    System_printf(buff);
-    System_flush();
-
-    BIOS_start();    /* does not return */
-    return(0);
+  BIOS_start();    /* does not return */
+  return 0;
 }
 
-/*
- *  ======== clockTerminate ========
- *  This function simply terminates the example
- */
-void clockTerminate(UArg arg)
-{
-    System_printf("bigTime ended.\n");
-    BIOS_exit(0);
+void clockTerminate(UArg arg) {
+  System_printf("bigTime ended.\n");
+  BIOS_exit(0);
 }
 
 /*
@@ -187,46 +181,37 @@ void clockTerminate(UArg arg)
  *  Wrapper function for Task objects calling
  *  Clock::tick()
  */
-void clockTask(UArg arg)
-{
-    Clock *clock = (Clock *)arg;
-    int count = 0;
+void clockTask(UArg arg) {
+  Clock *clock = (Clock *)arg;
+  int count = 0;
 
-    if (clock->getId() == 3) {
-        for(;;) {             // task id = 3
-            Guard guard(sem0);
-            clock->tick();
-            if(count == 50) {
-                Task_sleep(25);
-                count = 0;
-            }
-            count++;
-        }
+  if (clock->getId() == 3) {
+    for(;;) {             // task id = 3
+      Guard guard(sem0);
+      clock->tick();
+      if(count == 50) {
+        Task_sleep(25);
+        count = 0;
+      }
+      count++;
     }
-    else {
-        for(;;) {             // task id = 4
-            Guard guard(sem1);
-            if(count == 50) {
-                Task_sleep(25);
-                count = 0;
-            }
-            clock->tick();
-            count++;
-        }
+  }
+  else {
+    for(;;) {             // task id = 4
+      Guard guard(sem1);
+      if(count == 50) {
+        Task_sleep(25);
+        count = 0;
+      }
+      clock->tick();
+      count++;
     }
+  }
 }
 
-/*
- * ======== clockPrd ========
- * Wrapper function for PRD objects calling
- * Clock::tick()
- */
-void clockPrd(UArg arg)
-{
-    Clock *clock = (Clock *)arg;
-
-    clock->tick();
-    return;
+void clockPrd(UArg arg) {
+  Clock *clock = (Clock *)arg;
+  clock->tick();
 }
 
 /*
@@ -236,11 +221,9 @@ void clockPrd(UArg arg)
  * It also calls System_flush() to periodically
  * print the contents in the SysMin buffer
  */
-void clockIdle(void)
-{
-    cl0.tick();
-    System_flush();
-    return;
+void clockIdle(void) {
+  cl0.tick();
+  System_flush();
 }
 
 /*
@@ -248,18 +231,18 @@ void clockIdle(void)
  */
 Clock::Clock(int newId)
 {
-    id = newId;
-    ticks = 0;
-    microsecond = 0;
-    millisecond = 0;
-    second = 0;
-    minute = 0;
-    hour = 0;
-    day = 19;
-    month = 8;
-    year = 10;
-    century = 20;
-    millenium = 0;
+  id = newId;
+  ticks = 0;
+  microsecond = 0;
+  millisecond = 0;
+  second = 0;
+  minute = 0;
+  hour = 0;
+  day = 19;
+  month = 8;
+  year = 10;
+  century = 20;
+  millenium = 0;
 }
 
 Clock::~Clock()
@@ -268,260 +251,260 @@ Clock::~Clock()
 
 void Clock::tick()
 {
-    ticks++;
+  ticks++;
 
-    if (getId() == 1) {
-        System_printf("id %d : %d:%d:%d.%d\n", getId(), hour, minute, second, millisecond / 100);
-        System_printf("id %d : %s %d, %d%d\n", getId(), (IArg)months[month-1], day, century, year);
-        /*
-         * id 1 expires every 100 ticks (and each tick is 1 millisecond)
-         */
-        setMillisecond(100);
+  if (getId() == 1) {
+    System_printf("id %d : %d:%d:%d.%d\n", getId(), hour, minute, second, millisecond / 100);
+    System_printf("id %d : %s %d, %d%d\n", getId(), (IArg)months[month-1], day, century, year);
+    /*
+     * id 1 expires every 100 ticks (and each tick is 1 millisecond)
+     */
+    setMillisecond(100);
+  }
+  if (getId() == 2) {
+    System_printf("id %d : %d:%d:%d\n", getId(), hour, minute, second);
+    System_printf("id %d : %s %d, %d%d\n", getId(), (IArg)months[month-1], day, century, year);
+    /*
+     * Change selected function to alter clock rate
+     */
+    //      setMicrosecond();
+    //      setMillisecond();
+    setSecond();
+    //      setMinute();
+    //      setDay();
+    if (ticks == 2) {
+      clockTerminate(0);
     }
-    if (getId() == 2) {
-        System_printf("id %d : %d:%d:%d\n", getId(), hour, minute, second);
-        System_printf("id %d : %s %d, %d%d\n", getId(), (IArg)months[month-1], day, century, year);
-        /*
-         * Change selected function to alter clock rate
-         */
-//      setMicrosecond();
-//      setMillisecond();
-        setSecond();
-//      setMinute();
-//      setDay();
-        if (ticks == 2) {
-            clockTerminate(0);
-        }
-    }
+  }
 
-    return;
+  return;
 }
 
 void Clock::setMicrosecond()
 {
-    if (microsecond >= 999) {
-        setMillisecond();
-        microsecond = 0;
-    }
-    else {
-        microsecond++;
-    }
+  if (microsecond >= 999) {
+    setMillisecond();
+    microsecond = 0;
+  }
+  else {
+    microsecond++;
+  }
 
-    return;
+  return;
 }
 
 void Clock::setMillisecond()
 {
-    if (millisecond >= 999) {
-        setSecond();
-        millisecond = 0;
-    }
-    else {
-        millisecond++;
-    }
+  if (millisecond >= 999) {
+    setSecond();
+    millisecond = 0;
+  }
+  else {
+    millisecond++;
+  }
 
-    return;
+  return;
 }
 
 void Clock::setMillisecond(int nMilliseconds)
 {
-    int secs;
+  int secs;
 
-    millisecond += nMilliseconds;
-    secs = millisecond / 1000;
-    millisecond %= 1000;
+  millisecond += nMilliseconds;
+  secs = millisecond / 1000;
+  millisecond %= 1000;
 
-    while (secs--) {
-        setSecond();
-    }
+  while (secs--) {
+    setSecond();
+  }
 
-    return;
+  return;
 }
 
 void Clock::setSecond()
 {
-    if (second == 59) {
-        setMinute();
-        second = 0;
-    }
-    else {
-        second++;
-    }
+  if (second == 59) {
+    setMinute();
+    second = 0;
+  }
+  else {
+    second++;
+  }
 
-    return;
+  return;
 }
 
 void Clock::setMinute()
 {
-    if (minute == 59) {
-        setHour();
-        minute = 0;
-    }
-    else {
-        minute++;
-    }
+  if (minute == 59) {
+    setHour();
+    minute = 0;
+  }
+  else {
+    minute++;
+  }
 
-    return;
+  return;
 }
 
 void Clock::setHour()
 {
-    if (hour == 23) {
-        setDay();
-        hour = 0;
-    }
-    else {
-        hour++;
-    }
+  if (hour == 23) {
+    setDay();
+    hour = 0;
+  }
+  else {
+    hour++;
+  }
 
-    return;
+  return;
 }
 
 void Clock::setDay()
 {
-    bool thirtydays = false;
-    bool feb = false;
-    bool leap = false;
+  bool thirtydays = false;
+  bool feb = false;
+  bool leap = false;
 
-    if (month == 4 || month == 6 || month == 9 || month == 11) {
-        // April, June, September, November.
-        thirtydays = true;
-    }
+  if (month == 4 || month == 6 || month == 9 || month == 11) {
+    // April, June, September, November.
+    thirtydays = true;
+  }
 
-    if (month == 2) {  // Test for February
-        feb = true;
-    }
+  if (month == 2) {  // Test for February
+    feb = true;
+  }
 
-    /*
-     * A year is a leap year if it is divisible by 4, but not by 100.
-     *
-     * If a year is divisible by 4 and by 100, it is a leap year only
-     * if it is also divisible by 400.
-     */
-    if ((year%4 == 0 && year%100 != 0) ||
-            (year%4 == 0 && year%100 == 0 && year%400 == 0)) {
-        leap = true;
-    }
+  /*
+   * A year is a leap year if it is divisible by 4, but not by 100.
+   *
+   * If a year is divisible by 4 and by 100, it is a leap year only
+   * if it is also divisible by 400.
+   */
+  if ((year%4 == 0 && year%100 != 0) ||
+      (year%4 == 0 && year%100 == 0 && year%400 == 0)) {
+    leap = true;
+  }
 
-    if ((day == 28) && (feb) && (!leap)) {
-        setMonth();
-        day = 1;
-    }
-    else if ((day == 29) && (feb) && (leap)) {
-        setMonth();
-        day = 1;
-    }
-    else if ((day == 30) && (thirtydays == true)) {
-        setMonth();
-        day = 1;
-    }
-    else if ((day == 31) && (thirtydays == false)) {
-        setMonth();
-        day = 1;
-    }
-    else {
-        day++;
-    }
+  if ((day == 28) && (feb) && (!leap)) {
+    setMonth();
+    day = 1;
+  }
+  else if ((day == 29) && (feb) && (leap)) {
+    setMonth();
+    day = 1;
+  }
+  else if ((day == 30) && (thirtydays == true)) {
+    setMonth();
+    day = 1;
+  }
+  else if ((day == 31) && (thirtydays == false)) {
+    setMonth();
+    day = 1;
+  }
+  else {
+    day++;
+  }
 
-    return;
+  return;
 }
 
 void Clock::setMonth()
 {
-    if (month >= 12) {
-        setYear();
-        month = 1;
-    }
-    else {
-        month++;
-    }
+  if (month >= 12) {
+    setYear();
+    month = 1;
+  }
+  else {
+    month++;
+  }
 
-    return;
+  return;
 }
 
 void Clock::setYear()
 {
-    year++;
-    if ((year%100) == 0) {
-        setCentury();
-    }
+  year++;
+  if ((year%100) == 0) {
+    setCentury();
+  }
 
-    return;
+  return;
 }
 
 void Clock::setCentury()
 {
-    century++;
-    if ((century%10) == 0) {
-        setMillenium();
-    }
+  century++;
+  if ((century%10) == 0) {
+    setMillenium();
+  }
 
-    return;
+  return;
 }
 
 void Clock::setMillenium()
 {
-    millenium++;
+  millenium++;
 
-    return;
+  return;
 }
 
 long Clock::getTicks()
 {
-    return ticks;
+  return ticks;
 }
 
 int Clock::getId()
 {
-    return id;
+  return id;
 }
 
 int Clock::getMicrosecond()
 {
-    return microsecond;
+  return microsecond;
 }
 
 int Clock::getMillisecond()
 {
-    return millisecond;
+  return millisecond;
 }
 
 int Clock::getSecond()
 {
-    return second;
+  return second;
 }
 
 int Clock::getMinute()
 {
-    return minute;
+  return minute;
 }
 
 int Clock::getHour()
 {
-    return hour;
+  return hour;
 }
 
 int Clock::getDay()
 {
-    return day;
+  return day;
 }
 
 int Clock::getMonth()
 {
-    return month;
+  return month;
 }
 
 int Clock::getYear()
 {
-    return year;
+  return year;
 }
 
 int Clock::getCentury()
 {
-    return century;
+  return century;
 }
 
 int Clock::getMillenium()
 {
-    return millenium;
+  return millenium;
 }
