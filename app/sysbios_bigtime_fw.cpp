@@ -94,12 +94,30 @@ Semaphore_Struct sem0Struct, sem1Struct;
 Semaphore_Handle sem0Handle, sem1Handle;
 Clock_Struct clk0Struct, clk1Struct;
 
-/*
- *  ======== main ========
- */
+class Sem {
+public:
+  Sem();
+  inline void pend() {
+    Semaphore_pend(_handle, BIOS_WAIT_FOREVER);
+  }
+  inline void post() {
+    Semaphore_post(_handle);
+  }
+private:
+    Semaphore_Struct _sem;
+    Semaphore_Handle _handle;
+};
+
+Sem::Sem() {
+  Semaphore_Params params;
+  Semaphore_Params_init(&params);
+  Semaphore_construct(&_sem, 1, &params);
+  _handle = Semaphore_Handle(&_sem);
+}
+
 void getDeviceInfo(char *buff, int buffsize);
-int main()
-{
+
+int main() {
 
     /* Construct BIOS objects */
     Task_Params taskParams;
