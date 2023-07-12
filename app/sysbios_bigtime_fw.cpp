@@ -90,8 +90,6 @@ Clock cl4(4);  /* task clock */
 
 Task_Struct task0Struct, task1Struct;
 Char task0Stack[TASKSTACKSIZE], task1Stack[TASKSTACKSIZE];
-Semaphore_Struct sem0Struct, sem1Struct;
-Semaphore_Handle sem0Handle, sem1Handle;
 Clock_Struct clk0Struct, clk1Struct;
 
 class Sem {
@@ -117,11 +115,13 @@ Sem::Sem() {
 
 void getDeviceInfo(char *buff, int buffsize);
 
+Sem sem0;
+Sem sem1;
+
 int main() {
 
     /* Construct BIOS objects */
     Task_Params taskParams;
-    Semaphore_Params semParams;
     Clock_Params clkParams;
 
     /* Construct clock Task thread */
@@ -136,14 +136,7 @@ int main() {
     Task_construct(&task1Struct, (Task_FuncPtr)clockTask, &taskParams, NULL);
 
     /* Construct Semaphores for clock thread to pend on, initial count 1 */
-    Semaphore_Params_init(&semParams);
-    Semaphore_construct(&sem0Struct, 1, &semParams);
-    /* Re-use default params */
-    Semaphore_construct(&sem1Struct, 1, &semParams);
 
-    /* Obtain instance handles */
-    sem0Handle = Semaphore_Handle(&sem0Struct);
-    sem1Handle = Semaphore_Handle(&sem1Struct);
 
     Clock_Params_init(&clkParams);
     clkParams.period = 100;
@@ -191,26 +184,26 @@ void clockTask(UArg arg)
 
     if (clock->getId() == 3) {
         for(;;) {             // task id = 3
-            Semaphore_pend(sem0Handle, BIOS_WAIT_FOREVER);
+            sem0.pend();
             clock->tick();
             if(count == 50) {
                 Task_sleep(25);
                 count = 0;
             }
             count++;
-            Semaphore_post(sem1Handle);
+            sem0.post();
         }
     }
     else {
         for(;;) {             // task id = 4
-            Semaphore_pend(sem1Handle, BIOS_WAIT_FOREVER);
+            sem1.pend();
             if(count == 50) {
                 Task_sleep(25);
                 count = 0;
             }
             clock->tick();
             count++;
-            Semaphore_post(sem0Handle);
+            sem1.post();
         }
     }
 }
