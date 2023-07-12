@@ -1,3 +1,5 @@
+//#include <vector>
+
 #include <xdc/std.h>
 #include <xdc/runtime/Diags.h>
 #include <xdc/runtime/System.h>
@@ -7,10 +9,27 @@
 #include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Clock.h>
+#include <ti/sysbios/family/arm/m3/Hwi.h>
 
 #include "Board.h"
 
+extern "C" void myExceptionHook(Hwi_ExcContext* ctx) {
+  System_printf("\nEOF EXCEPTION\n");
+}
+
+extern "C" void myAbortSystem() {
+  System_printf("\nEOF ABORT\n");
+  System_flush();
+  System_abortStd();
+}
+
+extern "C" void myExitSystem(int code) {
+  System_printf("\nEOF EXIT: %d\n", code);
+  System_flush();
+  System_exitStd(code);
+}
 #define TASKSTACKSIZE   512
+//const stack_size = 512;
 
 class Clock {
 public:
@@ -40,26 +59,24 @@ private:
  * Tool
  */
 extern "C" {
+  void clockTerminate(UArg arg);
 
-/* Wrapper function to terminate the example */
-void clockTerminate(UArg arg);
-
-/* Wrapper functions to call Clock::tick() */
-void clockTask(UArg arg);
-void clockPrd(UArg arg);
-void clockIdle(void);
-
-} // end extern "C"
+  /* Wrapper functions to call Clock::tick() */
+  void clockTask(UArg arg);
+  void clockPrd(UArg arg);
+  void clockIdle(void);
+}
 
 /* Global clock objects */
 Clock cl0(0);  /* idle loop clock */
-Clock cl1(1);  /* periodic clock, period = 1 ms */
+Clock cl1(1);  /* periodic clock, period = 100 ms */
 Clock cl2(2);  /* periodic clock, period = 1 sec */
 Clock cl3(3);  /* task clock */
 Clock cl4(4);  /* task clock */
 
 Task_Struct task0Struct, task1Struct;
 Char task0Stack[TASKSTACKSIZE], task1Stack[TASKSTACKSIZE];
+
 
 class Sem {
 public:
@@ -113,10 +130,12 @@ void getDeviceInfo(char *buff, int buffsize);
 Sem sem0;
 Sem sem1;
 
-Clk myClock0(100, (Clock_FuncPtr)&clockPrd, &cl1);
-Clk myClock1(1000, (Clock_FuncPtr)&clockPrd, &cl2);
+Clk myClock1(100, (Clock_FuncPtr)&clockPrd, &cl1);
+Clk myClock2(1000, (Clock_FuncPtr)&clockPrd, &cl2);
 
 int main() {
+//std::vector<uint8_t> stack0(stack_size);
+//std::vector<uint8_t> stack1(stack_size);
   Task_Params taskParams;
   Task_Params_init(&taskParams);
   taskParams.arg0 = (UArg)&cl3;
