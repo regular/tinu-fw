@@ -125,6 +125,20 @@ private:
   const Sem& _sem;
 };
 
+class Clk {
+public:
+  Clk(int period, Clock_FuncPtr f, void* arg) {
+    Clock_Params params;
+    Clock_Params_init(&params);
+    params.period = period;
+    params.startFlag = true;
+    params.arg = (UArg)arg;
+    Clock_construct(&_clk, f, 1, &params);
+  }
+private:
+  Clock_Struct _clk;
+};
+
 void getDeviceInfo(char *buff, int buffsize);
 
 Sem sem0;
