@@ -95,10 +95,10 @@ Clock_Struct clk0Struct, clk1Struct;
 class Sem {
 public:
   Sem();
-  inline void pend() {
+  inline void pend() const {
     Semaphore_pend(_handle, BIOS_WAIT_FOREVER);
   }
-  inline void post() {
+  inline void post() const {
     Semaphore_post(_handle);
   }
 private:
@@ -111,7 +111,19 @@ Sem::Sem() {
   Semaphore_Params_init(&params);
   Semaphore_construct(&_sem, 1, &params);
   _handle = Semaphore_Handle(&_sem);
-}
+};
+
+class Guard {
+public:
+  Guard(const Sem& sem) : _sem(sem) {
+    _sem.pend();
+  }
+  ~Guard() {
+    _sem.post();
+  }
+private:
+  const Sem& _sem;
+};
 
 void getDeviceInfo(char *buff, int buffsize);
 
@@ -135,22 +147,17 @@ int main() {
     taskParams.arg0 = (UArg)&cl4;
     Task_construct(&task1Struct, (Task_FuncPtr)clockTask, &taskParams, NULL);
 
-    /* Construct Semaphores for clock thread to pend on, initial count 1 */
-
-
     Clock_Params_init(&clkParams);
     clkParams.period = 100;
     clkParams.startFlag = true;
     clkParams.arg = (UArg)&cl1;
     Clock_construct(&clk0Struct, (Clock_FuncPtr)clockPrd,
                     1, &clkParams);
-
     clkParams.period = 1000;
     clkParams.startFlag = true;
     clkParams.arg = (UArg)&cl2;
     Clock_construct(&clk1Struct, (Clock_FuncPtr)clockPrd,
                     1, &clkParams);
-
     System_printf("bigTime started.\n");
     char buff[128];
     getDeviceInfo(buff, sizeof(buff));
@@ -184,26 +191,24 @@ void clockTask(UArg arg)
 
     if (clock->getId() == 3) {
         for(;;) {             // task id = 3
-            sem0.pend();
+            Guard guard(sem0);
             clock->tick();
             if(count == 50) {
                 Task_sleep(25);
                 count = 0;
             }
             count++;
-            sem0.post();
         }
     }
     else {
         for(;;) {             // task id = 4
-            sem1.pend();
+            Guard guard(sem1);
             if(count == 50) {
                 Task_sleep(25);
                 count = 0;
             }
             clock->tick();
             count++;
-            sem1.post();
         }
     }
 }
