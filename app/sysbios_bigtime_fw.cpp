@@ -1,4 +1,5 @@
 //#include <vector>
+#include <stdio.h>
 
 #include <xdc/std.h>
 #include <xdc/runtime/Diags.h>
@@ -141,6 +142,9 @@ Clk myClock1(100, (Clock_FuncPtr)&clockPrd, &cl1);
 Clk myClock2(1000, (Clock_FuncPtr)&clockPrd, &cl2);
 
 int main() {
+  char input = getchar();
+  System_printf("got input: %c\n", input);
+
 //std::vector<uint8_t> stack0(stack_size);
 //std::vector<uint8_t> stack1(stack_size);
   Task_Params taskParams;
