@@ -1,20 +1,17 @@
-SIMPLELINK_CC2640R2_SDK_INSTALL_DIR ?= $(abspath ../../../../../../..)
+NAME ?= tinu_fw
 
+SIMPLELINK_CC2640R2_SDK_INSTALL_DIR ?= $(abspath ../../../../../../..)
 include $(SIMPLELINK_CC2640R2_SDK_INSTALL_DIR)/imports.mak
 
 XDCPATH = $(SIMPLELINK_CC2640R2_SDK_INSTALL_DIR)/source;$(SIMPLELINK_CC2640R2_SDK_INSTALL_DIR)/kernel/tirtos/packages;
-
 CC = "$(CCS_ARMCOMPILER)/bin/armcl"
 LNK = "$(CCS_ARMCOMPILER)/bin/armcl"
-
 XDCTARGET = ti.targets.arm.elf.M3
 PLATFORM = ti.platforms.simplelink:CC2640R2F
 
-OBJECTS = sysbios_bigtime_fw.obj chiptypes.obj CC2640R2_LAUNCHXL.obj CC2640R2_LAUNCHXL_fxns.obj ccfg.obj
+OBJECTS = CC2640R2_LAUNCHXL.obj CC2640R2_LAUNCHXL_fxns.obj ccfg.obj
 
-CONFIGPKG = sysbios_bigtime_fw
-
-NAME = sysbios_bigtime_fw
+CONFIGPKG = $(NAME)
 
 CFLAGS = -I../.. \
     -DDeviceFamily_CC26X0R2 \
@@ -55,17 +52,9 @@ all: $(NAME).out
 
 $(CONFIGPKG)/compiler.opt: $(CONFIGPKG)/linker.cmd
 
-$(CONFIGPKG)/linker.cmd: ../../tirtos/sysbios_bigtime_fw.cfg
+$(CONFIGPKG)/linker.cmd: ../../tirtos/tinu-fw.cfg
 	@ echo Running Configuro...
-	@ $(XDC_INSTALL_DIR)/xs --xdcpath="$(XDCPATH)" xdc.tools.configuro -c "$(CCS_ARMCOMPILER)" -t $(XDCTARGET) -p $(PLATFORM) --compileOptions "$(CFLAGS)" -o "$(CONFIGPKG)" ../../tirtos/sysbios_bigtime_fw.cfg
-
-sysbios_bigtime_fw.obj: ../../sysbios_bigtime_fw.cpp $(CONFIGPKG)/compiler.opt
-	@ echo Building $@
-	@ $(CC) $(CFLAGS) $< --cmd_file=$(CONFIGPKG)/compiler.opt --output_file=$@
-
-chiptypes.obj: ../../chiptypes.cpp $(CONFIGPKG)/compiler.opt
-	@ echo Building $@
-	@ $(CC) $(CFLAGS) $< --cmd_file=$(CONFIGPKG)/compiler.opt --output_file=$@
+	@ $(XDC_INSTALL_DIR)/xs --xdcpath="$(XDCPATH)" xdc.tools.configuro -c "$(CCS_ARMCOMPILER)" -t $(XDCTARGET) -p $(PLATFORM) --compileOptions "$(CFLAGS)" -o "$(CONFIGPKG)" ../../tirtos/tinu-fw.cfg
 
 CC2640R2_LAUNCHXL.obj: ../../CC2640R2_LAUNCHXL.c $(CONFIGPKG)/compiler.opt
 	@ echo Building $@
@@ -79,6 +68,8 @@ ccfg.obj: ../../ccfg.c $(CONFIGPKG)/compiler.opt
 	@ echo Building $@
 	@ $(CC) $(CFLAGS) $< --cmd_file=$(CONFIGPKG)/compiler.opt --output_file=$@
 
+include _tinu-fw.mak
+
 $(NAME).out: $(OBJECTS) $(CONFIGPKG)/linker.cmd
 	@ echo linking $@
 	@ $(LNK) $(CFLAGS) -z $(OBJECTS) -l$(CONFIGPKG)/linker.cmd $(LFLAGS) -o $(NAME).out
@@ -89,3 +80,4 @@ clean:
 	@ $(RM) $(NAME).out > $(DEVNULL) 2>&1
 	@ $(RM) $(NAME).map > $(DEVNULL) 2>&1
 	@ $(RMDIR) $(NAME) > $(DEVNULL) 2>&1
+
