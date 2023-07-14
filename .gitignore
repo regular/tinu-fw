@@ -1,6 +1,2 @@
-*.obj
-*.map
-app/tirtos/ccs/*.out
-app/tirtos/ccs/sysbios_bigtime_fw
 node_modules
 package-lock.json
